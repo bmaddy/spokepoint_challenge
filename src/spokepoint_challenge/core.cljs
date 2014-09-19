@@ -1,9 +1,13 @@
 (ns spokepoint-challenge.core
   (:require [clojure.string :as s]
             [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]))
+            [om.dom :as dom :include-macros true]
+            [clojure.browser.repl :as repl]
+            ))
 
 (enable-console-print!)
+
+(repl/connect "http://localhost:9000/1/repl/start")
 
 (def raw-data "Outlet name
 First name

@@ -13,14 +13,24 @@
 
   :source-paths ["src"]
 
-  :profiles {:dev {:plugins [[com.cemerick/austin "0.1.5"]]}}
-  ;; (cemerick.piggieback/cljs-repl :repl-env (cemerick.austin/exec-env))
+  :profiles {:dev {:plugins [[com.cemerick/austin "0.1.5"]]
+                   :cljsbuild {
+                               :builds [{:id "spokepoint-challenge"
+                                         :source-paths ["src"]
+                                         :compiler {
+                                                    :output-to "spokepoint_challenge.js"
+                                                    :output-dir "out"
+                                                    :optimizations :none
+                                                    :source-map true}}]}}}
+  ;:repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   
-  :cljsbuild { 
-    :builds [{:id "spokepoint-challenge"
-              :source-paths ["src"]
-              :compiler {
-                :output-to "spokepoint_challenge.js"
-                :output-dir "out"
-                :optimizations :none
-                :source-map true}}]})
+  )
+
+(comment
+  ;; start cljs repl
+  M-x cider-jack-in
+  (cemerick.austin/start-server 9000)
+  (def repl-env (cemerick.austin/repl-env :session-id "1"))
+  (cemerick.austin.repls/cljs-repl repl-env)
+  ;then repl/connect to printed url
+  )
