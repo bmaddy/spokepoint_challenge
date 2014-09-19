@@ -9,6 +9,9 @@
 
 (repl/connect "http://localhost:9000/1/repl/start")
 
+(defn hello []
+  (js/alert "Hello"))
+
 (def raw-data "Outlet name
 First name
 Last name

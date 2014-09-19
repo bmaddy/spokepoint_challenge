@@ -20,8 +20,9 @@
                                          :compiler {
                                                     :output-to "spokepoint_challenge.js"
                                                     :output-dir "out"
-                                                    :optimizations :none
-                                                    :source-map true}}]}}}
+                                                    :optimizations :simple
+                                                    ;:source-map true
+                                                    }}]}}}
   ;:repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
   
   )
@@ -32,5 +33,12 @@
   (cemerick.austin/start-server 9000)
   (def repl-env (cemerick.austin/repl-env :session-id "1"))
   (cemerick.austin.repls/cljs-repl repl-env)
-  ;then repl/connect to printed url
+
+  lein trampoline cljsbuild auto
+  load index.html
+  cljs> (js/alert "foo") ; this works great
+  cljs> (in-ns 'spokepoint-challenge.core)
+  cljs> (hello)
+  ;=> "Error evaluating:" (hello) :as "spokepoint_challenge.core.hello.call(null);\n"
+  ;=> #<ReferenceError: spokepoint_challenge is not defined>
   )
