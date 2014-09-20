@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros [html]]
             [weasel.repl :as ws-repl]
             [figwheel.client :as fw :include-macros true]
             ))
@@ -121,10 +122,22 @@ Y
   (fn [app owner]
     (reify om/IRender
       (render [_]
-        (dom/h1 nil (:text app)))))
+        (html
+         [:div
+          [:h1 "Spokepoint Challenge"]
+          [:h2 (:text app)]
+          [:div.col-md-2]
+          [:div.col-md-8
+           [:table.table
+            [:tr
+             [:td "one"]
+             [:td "two"]]]]
+          [:div.col-md-2]])
+        )))
   app-state
   {:target (. js/document (getElementById "app"))})
 
-#_(fw/watch-and-reload
-  :websocket-url   "ws://localhost:3449/figwheel-ws"
+(fw/watch-and-reload
+ :websocket-url   "ws://localhost:3449/figwheel-ws"
+ ;; maybe add :url-rewriter
   :jsload-callback (fn [] (print "reloaded")))
