@@ -2,12 +2,20 @@
   (:require [clojure.string :as s]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [clojure.browser.repl :as repl]
+            [weasel.repl :as ws-repl]
+            [figwheel.client :as fw :include-macros true]
             ))
 
 (enable-console-print!)
 
-(repl/connect "http://localhost:9000/1/repl/start")
+(defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
+                   true))
+(comment
+  lein trampoline cljsbuild auto
+  M-x cider-jack-in
+  (simple-brepl)
+  "open resources/public/index.html")
+
 
 (defn hello []
   (js/alert "Hello"))
@@ -116,3 +124,7 @@ Y
         (dom/h1 nil (:text app)))))
   app-state
   {:target (. js/document (getElementById "app"))})
+
+#_(fw/watch-and-reload
+  :websocket-url   "ws://localhost:3449/figwheel-ws"
+  :jsload-callback (fn [] (print "reloaded")))
