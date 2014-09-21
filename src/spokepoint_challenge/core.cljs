@@ -139,5 +139,5 @@ Y
 
 (fw/watch-and-reload
  :websocket-url   "ws://localhost:3449/figwheel-ws"
- ;; maybe add :url-rewriter
-  :jsload-callback (fn [] (print "reloaded")))
+ :url-rewriter #(str "http:" %)
+ :jsload-callback (fn [] (print "reloaded")))
