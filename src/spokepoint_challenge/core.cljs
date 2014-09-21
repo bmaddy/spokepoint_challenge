@@ -12,7 +12,7 @@
 (defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
                    true))
 (comment
-  lein trampoline cljsbuild auto
+  lein figwheel
   M-x cider-jack-in
   (simple-brepl)
   "open resources/public/index.html")
@@ -107,8 +107,10 @@ boredom
 Y
 ")
 
-(def columns [:outlet-name :first-name :last-name :pitch-angle :relevance :reach :replied?])
-(def column-converters [str str str str #(.parseInt js/Number %) #(.parseInt js/Number %) {"Y" true "N" false}])
+(def columns ["Outlet name" "First name" "Last name" "Pitch Angle" "Relevance" "Reach" "Replied?"])
+(def column-converters [str str str str #(js/parseInt %) #(js/parseInt %) {"Y" true "N" false}])
+(def sort-glyphicon {:asc "glyphicon-sort-by-attributes-alt"
+                     :desc "glyphicon-sort-by-attributes"})
 
 (def data (->> (s/split raw-data #"\n")
                (partition 7)
@@ -116,10 +118,24 @@ Y
                (map (fn [values] (map #(%1 %2) column-converters values)))
                (map #(zipmap columns %))))
 
-(def app-state (atom {:text "Hello world!"}))
+(def app-state (atom {:text "Hello world!" :sort-col "Relevance" :sort-dir :desc}))
+
+(defn apply-sort [data {:keys [sort-col sort-dir]}]
+  (case sort-dir
+    :none data
+    :desc (sort-by #(% sort-col) data)
+    :asc (reverse (sort-by #(% sort-col) data))))
+
+(defn update-sort [{:keys [sort-col sort-dir] :as state} column]
+  (.log js/console (pr-str [state column]))
+  (assoc state
+    :sort-col column
+    :sort-dir (if (not= sort-col column)
+                :desc
+                (first (rest (drop-while #(not= % sort-dir) (cycle [:desc :asc :none])))))))
 
 (om/root
-  (fn [app owner]
+ (fn [{:keys [sort-col sort-dir] :as app} owner]
     (reify om/IRender
       (render [_]
         (html
@@ -130,10 +146,16 @@ Y
           [:div.col-md-8
            [:table.table
             [:tr
-             [:td "one"]
-             [:td "two"]]]]
-          [:div.col-md-2]])
-        )))
+             (for [column columns]
+               [:th {:on-click #(swap! app-state update-sort column)}
+                (name (str column " "))
+                (when (= sort-col column)
+                  [:span {:class (str "glyphicon " (sort-glyphicon sort-dir))}])])]
+            (for [row (apply-sort data app)]
+              [:tr
+               (for [column columns]
+                 [:td (row column)])])]]
+          [:div.col-md-2]]))))
   app-state
   {:target (. js/document (getElementById "app"))})
 
