@@ -226,7 +226,6 @@ N")
     :asc (reverse (sort-by #(% sort-col) data))))
 
 (defn update-sort [{:keys [sort-col sort-dir] :as state} column]
-  (.log js/console (pr-str [state column]))
   (assoc state
     :sort-col column
     :sort-dir (if (not= sort-col column)
@@ -271,7 +270,8 @@ N")
             (for [column (remove #{"First name" "Last name"} columns)
                   :let [active? (if (= column selected-tab) "active" "")]]
               [:li {:class active?}
-               [:a {:href "#" :on-click #(swap! app-state assoc :selected-tab column)}
+               [:a {:href "#" :on-click #(do (om/update! app :selected-tab column)
+                                             (.preventDefault %))}
                 column]])]
            [:div
             "Totals by " selected-tab]
@@ -279,8 +279,11 @@ N")
            [:table.table
             [:tr
              (for [column columns]
-               [:th {:on-click #(swap! app-state update-sort column)}
-                (name (str column " "))
+               [:th
+                [:a {:href "#"  :on-click (fn [e]
+                                            (om/transact! app  #(update-sort % column))
+                                            (.preventDefault e))}
+                 (name (str column " "))]
                 (when (= sort-col column)
                   [:span {:class (str "glyphicon " (sort-glyphicon sort-dir))}])])]
             (for [row (apply-sort data app)]
@@ -294,4 +297,4 @@ N")
 (fw/watch-and-reload
  :websocket-url   "ws://localhost:3449/figwheel-ws"
  :url-rewriter #(str "http:" %)
- :jsload-callback (fn [] (print "reloaded")))
+ :jsload-callback #(print "reloaded"))
