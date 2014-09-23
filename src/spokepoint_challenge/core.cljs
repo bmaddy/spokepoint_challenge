@@ -233,11 +233,13 @@ N")
                 (first (rest (drop-while #(not= % sort-dir) (cycle [:desc :asc :none])))))))
 
 (defn build-graph [selector column]
-  (let [svg (dimple.newSvg selector 590 400)]
-    (doto (dimple.chart. svg (clj->js data))
+  (let [svg (dimple.newSvg selector 590 450)
+        counted-data (map #(assoc % "Records" 1) data)]
+    (doto (dimple.chart. svg (clj->js counted-data))
+      (.setBounds 60 30 530 310)
       (.addCategoryAxis "x" column)
-      (.addMeasureAxis "y" "Relevance")
-      (.addSeries "Brand" dimple.plot.bar)
+      (.addMeasureAxis "y" "Records")
+      (.addSeries nil dimple.plot.bar)
       (.draw))
     svg))
 
