@@ -22,6 +22,8 @@
                                          :compiler {:output-to "resources/public/js/app.js"
                                                     :output-dir "resources/public/js/out"
                                                     :optimizations :none
+                                                    :externs ["resources/public/externs/d3.v3.min.js"
+                                                              "resources/public/externs/dimple.v2.1.0.min.js"]
                                                     :pretty-print true
                                                     :source-map true}}]}
                    :figwheel {:http-server-root "public"

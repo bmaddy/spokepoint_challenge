@@ -1,5 +1,6 @@
 (ns spokepoint-challenge.core
   (:require [clojure.string :as s]
+            ;;[cljs.core.async :as async :refer [>! <! put! take! chan close!]]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros [html]]
@@ -12,10 +13,11 @@
 (defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
                    true))
 (comment
-  lein figwheel
-  M-x cider-jack-in
+  ;;lein figwheel
+  ;;M-x cider-jack-in
   (simple-brepl)
-  "open resources/public/index.html")
+  ;;open resources/public/index.html
+  )
 
 
 (defn hello []
@@ -105,7 +107,104 @@ boredom
 2
 4
 Y
-")
+Business Insider
+Megan
+Rose Dickey
+tech
+4
+3
+N
+The Independent
+Sally
+Newall
+boredom
+2
+3
+N
+Gizmodo
+Andrew
+Liszewski
+boredom
+2
+3
+Y
+ABC News
+Becky
+Worley
+tech
+1
+4
+Y
+TechCrunch
+Catherine
+Shu
+
+1
+3
+N
+Wired
+Bryan
+
+
+1
+4
+N
+NY Times
+Nick
+Wingfield
+boredom
+1
+4
+N
+Ian
+Bush
+KYW-AM
+tech
+2
+1
+Y
+Laura
+Sydell
+NPR News
+tech
+2
+1
+N
+TechCrunch
+Mike
+Butcher
+tech
+2
+3
+Y
+TechCrunch
+Natasha
+Lomas
+tech
+3
+3
+Y
+Examiner
+Eve-Angeline
+Mitchell
+tech
+4
+4
+N
+Business Insider
+Dylan
+Love
+tech
+3
+3
+N
+SFGate
+Julie
+Balise
+local press
+3
+3
+N")
 
 (def columns ["Outlet name" "First name" "Last name" "Pitch Angle" "Relevance" "Reach" "Replied?"])
 (def column-converters [str str str str #(js/parseInt %) #(js/parseInt %) {"Y" true "N" false}])
@@ -118,7 +217,7 @@ Y
                (map (fn [values] (map #(%1 %2) column-converters values)))
                (map #(zipmap columns %))))
 
-(def app-state (atom {:text "Hello world!" :sort-col "Relevance" :sort-dir :desc}))
+(def app-state (atom {:selected-tab "Outlet name" :sort-col "Relevance" :sort-dir :desc}))
 
 (defn apply-sort [data {:keys [sort-col sort-dir]}]
   (case sort-dir
@@ -134,16 +233,49 @@ Y
                 :desc
                 (first (rest (drop-while #(not= % sort-dir) (cycle [:desc :asc :none])))))))
 
+(defn build-graph [selector column]
+  (let [svg (dimple.newSvg selector 590 400)]
+    (doto (dimple.chart. svg (clj->js data))
+      (.addCategoryAxis "x" column)
+      (.addMeasureAxis "y" "Relevance")
+      (.addSeries "Brand" dimple.plot.bar)
+      (.draw))
+    svg))
+
+(defn graph-view [app-data owner]
+  (reify
+    om/IInitState
+    (init-state [this] {:chart (atom nil)})
+    om/IDidMount
+    (did-mount [this]
+      (reset! (om/get-state owner :chart) (build-graph ".chart" (:selected-tab app-data))))
+    om/IDidUpdate
+    (did-update [this next-props next-state]
+      (let [chart (om/get-state owner :chart)]
+        (.remove @chart)
+        (reset! chart (build-graph ".chart" (:selected-tab app-data)))))
+    om/IRender
+    (render [this]
+      (html [:div.chart]))))
+
 (om/root
- (fn [{:keys [sort-col sort-dir] :as app} owner]
+ (fn [{:keys [selected-tab sort-col sort-dir] :as app} owner]
     (reify om/IRender
       (render [_]
         (html
          [:div
           [:h1 "Spokepoint Challenge"]
-          [:h2 (:text app)]
           [:div.col-md-2]
           [:div.col-md-8
+           [:ul {:class "nav nav-tabs" :role "tablist"}
+            (for [column (remove #{"First name" "Last name"} columns)
+                  :let [active? (if (= column selected-tab) "active" "")]]
+              [:li {:class active?}
+               [:a {:href "#" :on-click #(swap! app-state assoc :selected-tab column)}
+                column]])]
+           [:div
+            "Totals by " selected-tab]
+           (om/build graph-view app)
            [:table.table
             [:tr
              (for [column columns]
