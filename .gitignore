@@ -11,3 +11,4 @@ resources/public/js/app.js
 resources/public/js/out
 .nrepl-port
 .repl
+tmp
