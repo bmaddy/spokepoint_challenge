@@ -283,7 +283,7 @@ N")
   app-state
   {:target (. js/document (getElementById "app"))})
 
-(if (= js/document.location.protocol "file:")
+(when (= js/document.location.protocol "file:")
   (defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
                      true))
 
