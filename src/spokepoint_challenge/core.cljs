@@ -207,7 +207,7 @@ local press
 N")
 
 (def columns ["Outlet name" "First name" "Last name" "Pitch Angle" "Relevance" "Reach" "Replied?"])
-(def column-converters [str str str str #(js/parseInt %) #(js/parseInt %) {"Y" true "N" false}])
+(def column-converters [str str str str #(js/parseInt %) #(js/parseInt %) str])
 (def sort-glyphicon {:asc "glyphicon-sort-by-attributes-alt"
                      :desc "glyphicon-sort-by-attributes"})
 
@@ -234,11 +234,11 @@ N")
 
 (defn build-graph [selector column]
   (let [svg (dimple.newSvg selector 590 450)
-        counted-data (map #(assoc % "Records" 1) data)]
+        counted-data (map #(assoc % "Contacts" 1) data)]
     (doto (dimple.chart. svg (clj->js counted-data))
       (.setBounds 60 30 530 310)
       (.addCategoryAxis "x" column)
-      (.addMeasureAxis "y" "Records")
+      (.addMeasureAxis "y" "Contacts")
       (.addSeries nil dimple.plot.bar)
       (.draw))
     svg))
