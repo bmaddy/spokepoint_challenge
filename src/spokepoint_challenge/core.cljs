@@ -10,12 +10,6 @@
 
 (enable-console-print!)
 
-(defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
-                   true))
-
-(defn hello []
-  (js/alert "Hello"))
-
 (def raw-data "Outlet name
 First name
 Last name
@@ -289,7 +283,11 @@ N")
   app-state
   {:target (. js/document (getElementById "app"))})
 
-(fw/watch-and-reload
- :websocket-url   "ws://localhost:3449/figwheel-ws"
- :url-rewriter #(str "http:" %)
- :jsload-callback #(print "reloaded"))
+(if (= js/document.location.protocol "file:")
+  (defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
+                     true))
+
+  (fw/watch-and-reload
+   :websocket-url   "ws://localhost:3449/figwheel-ws"
+   :url-rewriter #(str "http:" %)
+   :jsload-callback #(print "reloaded")))
