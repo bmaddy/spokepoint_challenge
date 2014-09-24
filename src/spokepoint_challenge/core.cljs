@@ -204,7 +204,7 @@ N")
                (map (fn [values] (map #(%1 %2) column-converters values)))
                (map #(zipmap columns %))))
 
-(def app-state (atom {:selected-tab "Outlet name" :sort-col "Relevance" :sort-dir :desc}))
+(def app-state (atom {:selected-tab "Outlet name" :sort-col "Outlet name" :sort-dir :none}))
 
 (defn apply-sort [data {:keys [sort-col sort-dir]}]
   (case sort-dir
