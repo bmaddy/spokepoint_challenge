@@ -12,13 +12,6 @@
 
 (defonce brepl (do (ws-repl/connect "ws://localhost:9001" :verbose true)
                    true))
-(comment
-  ;;lein figwheel
-  ;;M-x cider-jack-in
-  (simple-brepl)
-  ;;open resources/public/index.html
-  )
-
 
 (defn hello []
   (js/alert "Hello"))
